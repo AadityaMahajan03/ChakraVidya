@@ -71,7 +71,7 @@ Contributions are welcome! Feel free to fork the repository and submit a pull re
 This project is licensed under the MIT License.
 
 ## 📬 Contact
-- **Author:** Yash Mahajan
+- **Author:** Yash Mahajan , Aaditya Mahajan
 - **GitHub:** [AadiyaMahajan03](https://github.com/AadiyaMahajan03)
 - **Email:** mahajanaaditya50@gmail.com
 
