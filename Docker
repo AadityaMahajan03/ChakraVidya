@@ -1,0 +1,50 @@
+# Use official Node LTS image with slim variant
+FROM node:18-slim
+
+# Install Python and required system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create and set working directory
+WORKDIR /app
+
+# Copy package files first for better layer caching
+COPY package*.json ./
+
+# Install Node dependencies
+RUN npm install && \
+    npm install -g concurrently && \
+    npm cache clean --force
+
+# Copy the rest of the files
+COPY . .
+
+# Create and activate Python virtual environment
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python dependencies directly
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir flask pandas
+
+# Environment variables
+ENV FLASK_APP=backend/server.py
+ENV FLASK_ENV=development
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV NODE_ENV=development
+
+# Expose ports (frontend and backend)
+EXPOSE 5173 5000
+
+# Health check (adjust the endpoint as needed)
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD curl -f http://localhost:5000/ || exit 1
+
+# Run both servers with proper signal handling
+CMD ["concurrently", "--names", "FRONTEND,BACKEND", "--prefix", "{name}:", \
+     "--prefix-colors", "bgBlue.bold,bgMagenta.bold", \
+     "npm run dev", "flask run"]
